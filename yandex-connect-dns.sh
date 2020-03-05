@@ -57,8 +57,6 @@ DOMAIN_TOKEN=$(get_settings DOMAIN_TOKEN)
 # Show your real IP
 MYIP=`curl -s 'http://checkip.dyndns.org' | sed 's/.*Current IP Address: \([0-9\.]*\).*/\1/g'`
 # Get IP in DNS
-#NSIP=`host kurazhov.ru dns1.yandex.ru | grep "has address" | awk '{print $4}' 2>>$LOG`
-#NSIP="8.8.8.8"
 ttl="3600"
 defType="A"
 get_domain_records
