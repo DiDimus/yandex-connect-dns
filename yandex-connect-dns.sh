@@ -2,7 +2,7 @@
 # ############
 # This script change A-record as default
 # First argument is a domain name, second argument may be another DNS type.
-# For example, to update AAAA record write this at second arg: "bash yandex-connect-dns.sh domain.com AAA"
+# For example, to update AAAA record write this at second arg: "bash yandex-connect-dns.sh domain.com AAAA"
 # ############
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin; export PATH
@@ -89,7 +89,7 @@ case $# in
     for i in ${!types[@]}; do
         if [[ ${types[$i]} == $2 && ${contents[$i]} != $MYIP  ]]; then
             update_domain_record ${records_id[$i]} ${subdomains[$i]}
-            echo -e "IP ${contents[$i]} changed to $MYIP for subdomain ${subdomains[$i]}"
+            echo -e "`date \"+%Y%m%d %H:%M\"` IP ${contents[$i]} changed to $MYIP for subdomain ${subdomains[$i]} in domain $1" >> $LOG
         fi
     done
     ;;
