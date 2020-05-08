@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ############
 # This script change A-record as default
-# First argument is a domain name, second argument may be another DNS type.
-# For example, to update AAAA record write this at second arg: "bash yandex-connect-dns.sh domain.com AAAA"
+# First argument is a action, second - is a domain name, third argument may be another DNS type.
+# For example, to update AAAA record write this at second arg: "bash yandex-connect-dns.sh update domain.com AAAA"
 # ############
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin; export PATH
@@ -65,13 +65,20 @@ ttl="3600"
 defType="A"
 case $# in
     0)
-    update_all
+    #update_all
     ;;
     1)
+        case $1 in
+        update) update_all;;
+        add) echo "Please, specify subdomain and domain.";;
+        *);;
+    2)
+      case $1 in 
+        
     # Get token here - https://pddimp.yandex.ru/api2/admin/get_token
-    DOMAIN_TOKEN=$(get_domain_token $1)
-    DOMAIN_NAME=$1
-    get_domain_records $1 $DOMAIN_TOKEN
+    DOMAIN_TOKEN=$(get_domain_token $2)
+    DOMAIN_NAME=$2
+    get_domain_records $2 $DOMAIN_TOKEN
     for i in ${!types[@]}; do
         if [[ ${types[$i]} == $defType && ${contents[$i]} != $MYIP ]]; then
             update_domain_record ${records_id[$i]} ${subdomains[$i]}
@@ -79,13 +86,13 @@ case $# in
         fi
     done
     ;;
-    2)
-    defType=$2
-    if [[ $2 == "AAAA" ]]; then MYIP=`curl -s 'http://ip6only.me/api/' | cut -d, -f2`; fi
+    3)
+    defType=$3
+    if [[ $3 == "AAAA" ]]; then MYIP=`curl -s 'http://ip6only.me/api/' | cut -d, -f2`; fi
     # Get token here - https://pddimp.yandex.ru/api2/admin/get_token
-    DOMAIN_TOKEN=$(get_domain_token $1)
-    DOMAIN_NAME=$1
-    get_domain_records $1 $DOMAIN_TOKEN
+    DOMAIN_TOKEN=$(get_domain_token $2)
+    DOMAIN_NAME=$2
+    get_domain_records $2 $DOMAIN_TOKEN
     for i in ${!types[@]}; do
         if [[ ${types[$i]} == $2 && ${contents[$i]} != $MYIP  ]]; then
             update_domain_record ${records_id[$i]} ${subdomains[$i]}
