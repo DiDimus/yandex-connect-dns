@@ -3,7 +3,9 @@ Shell script for updating current IP using yandex.connect
 
 # Requirements
 bash
+
 curl
+
 jq
 
 ## How to use?
