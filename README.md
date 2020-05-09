@@ -1,8 +1,12 @@
 # yandex-connect-dns
 Shell script for updating current IP using yandex.connect
 
+# Requirements
+bash
+curl
+jq
+
 ## How to use?
-It's simple.
 1. Clone or copy yandex-connect-dns.sh
 ```bash
 git clone https://github.com/DiDimus/yandex-connect-dns
@@ -15,9 +19,9 @@ chmod +x yandex-connect-dns.sh
 3. Create settings.ini with the following contents:
 
 ```text
-DOMAIN_TOKEN:123456789ABCDEF0000000000000000000000000000000000000
-DOMAIN_NAME:your_domain.domain
+example.com:123456789ABCDEF0000000000000000000000000000000000000
 ```
+where example.com - your domain, 123456789ABC... - API token. Get it here - https://pddimp.yandex.ru/api2/admin/get_token
 
 4. Launch script or create a cron job like this
 ```bash
