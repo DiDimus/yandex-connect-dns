@@ -11,11 +11,16 @@ IFS=$'\n'
 
 get_domain_records() { # first arg is a domain name, second - domain token
     response=$( curl -s -H "PddToken: ${2}" "https://pddimp.yandex.ru/api2/admin/dns/list?domain=${1}" )
-    records_id=( $(jq -r '.records[].record_id' <<< ${response}) )
-    fqdns=( $(jq -r '.records[].fqdn' <<< ${response}) )
-    types=( $(jq -r '.records[].type' <<< ${response}) )
-    contents=( $(jq -r '.records[].content' <<< ${response}) )
-    subdomains=( $(jq -r '.records[].subdomain' <<< ${response}) )
+    if [[ $(jq -r '.success' <<< ${response}) == "ok" ]]; then
+        records_id=( $(jq -r '.records[].record_id' <<< ${response}) )
+        fqdns=( $(jq -r '.records[].fqdn' <<< ${response}) )
+        types=( $(jq -r '.records[].type' <<< ${response}) )
+        contents=( $(jq -r '.records[].content' <<< ${response}) )
+        subdomains=( $(jq -r '.records[].subdomain' <<< ${response}) )
+    else
+        echo "Smthg wrong"
+        exit 1
+    fi
 }
 
 get_domain_token() { # first arg is a domain
