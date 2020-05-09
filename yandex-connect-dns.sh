@@ -17,14 +17,28 @@ get_domain_records() { # first arg is a domain name, second - domain token
         types=( $(jq -r '.records[].type' <<< ${response}) )
         contents=( $(jq -r '.records[].content' <<< ${response}) )
         subdomains=( $(jq -r '.records[].subdomain' <<< ${response}) )
-    else
-        echo "Smthg wrong"
+    elif [[ $(jq -r '.success' <<< ${response}) == "error" ]]; then
+        CODE=$(jq -r '.error' <<< ${response})
+        case $CODE in
+            unknown) echo "Произошел временный сбой или ошибка работы API (повторите запрос позже).";;
+            no_token | no_domain | no_ip) echo "Не передан обязательный параметр.";;
+            bad_domain) echo "Имя домена не указано или не соответствует RFC1035.";;
+            prohibited) echo "Запрещенное имя домена.";;
+            bad_token | bad_login | bad_passwd) echo "Передан неверный ПДД-токен (логин, пароль).";;
+            no_auth) echo "Не передан заголовок PddToken.";;
+            not_allowed) echo "Пользователю недоступна данная операция (он не является администратором этого домена).";;
+            blocked) echo "Домен заблокирован (например, за спам и т.п.).";;
+            occupied) echo "Имя домена используется другим пользователем.";;
+            domain_limit_reached) echo "Превышено допустимое количество подключенных доменов (50).";;
+            no_reply) echo "Яндекс.Почта для домена не может установить соединение с сервером-источником для импорта.";;
+           *);;
+        esac
         exit 1
     fi
 }
 
 get_domain_token() { # first arg is a domain
-    for line in $(cat settings.ini)
+    for line in $(cat $SCRIPT_DIR/settings.ini)
         do
             if [[ $(echo $line | cut -d: -f1) == $1 ]]; then
             echo $line | cut -d: -f2
@@ -42,7 +56,7 @@ update_domain_record() { # first arg is a record_id, second - subdomain
     fi
 }
 update_all() { # read all content settings.ini
-    for line in $(cat settings.ini)
+    for line in $(cat $SCRIPT_DIR/settings.ini)
         do
             DOMAIN_NAME=`echo $line | cut -d: -f1`
             DOMAIN_TOKEN=`echo $line | cut -d: -f2`
@@ -59,7 +73,8 @@ update_all() { # read all content settings.ini
 ############ Scripts       ############
 # File log
 LOG=/var/log/ip.log
-if [[ ! -f ./settings.ini ]]; then
+SCRIPT_DIR=$( dirname "$0" )
+if [[ ! -f $SCRIPT_DIR/settings.ini ]]; then
     echo "settings.ini doesn't exist. Create them."
     exit 1
 fi
