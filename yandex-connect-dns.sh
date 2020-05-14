@@ -11,11 +11,30 @@ IFS=$'\n'
 
 get_domain_records() { # first arg is a domain name, second - domain token
     response=$( curl -s -H "PddToken: ${2}" "https://pddimp.yandex.ru/api2/admin/dns/list?domain=${1}" )
-    records_id=( $(jq -r '.records[].record_id' <<< ${response}) )
-    fqdns=( $(jq -r '.records[].fqdn' <<< ${response}) )
-    types=( $(jq -r '.records[].type' <<< ${response}) )
-    contents=( $(jq -r '.records[].content' <<< ${response}) )
-    subdomains=( $(jq -r '.records[].subdomain' <<< ${response}) )
+    if [[ $(jq -r '.success' <<< ${response}) == "ok" ]]; then
+        records_id=( $(jq -r '.records[].record_id' <<< ${response}) )
+        fqdns=( $(jq -r '.records[].fqdn' <<< ${response}) )
+        types=( $(jq -r '.records[].type' <<< ${response}) )
+        contents=( $(jq -r '.records[].content' <<< ${response}) )
+        subdomains=( $(jq -r '.records[].subdomain' <<< ${response}) )
+    elif [[ $(jq -r '.success' <<< ${response}) == "error" ]]; then
+        CODE=$(jq -r '.error' <<< ${response})
+        case $CODE in
+            unknown) echo "Произошел временный сбой или ошибка работы API (повторите запрос позже).";;
+            no_token | no_domain | no_ip) echo "Не передан обязательный параметр.";;
+            bad_domain) echo "Имя домена не указано или не соответствует RFC1035.";;
+            prohibited) echo "Запрещенное имя домена.";;
+            bad_token | bad_login | bad_passwd) echo "Передан неверный ПДД-токен (логин, пароль).";;
+            no_auth) echo "Не передан заголовок PddToken.";;
+            not_allowed) echo "Пользователю недоступна данная операция (он не является администратором этого домена).";;
+            blocked) echo "Домен заблокирован (например, за спам и т.п.).";;
+            occupied) echo "Имя домена используется другим пользователем.";;
+            domain_limit_reached) echo "Превышено допустимое количество подключенных доменов (50).";;
+            no_reply) echo "Яндекс.Почта для домена не может установить соединение с сервером-источником для импорта.";;
+           *);;
+        esac
+        exit 1
+    fi
 }
 
 get_domain_token() { # first arg is a domain
