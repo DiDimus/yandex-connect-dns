@@ -4,7 +4,7 @@
 # First argument is a action, second - is a domain name, third argument may be another DNS type.
 # For example, to update AAAA record write this at second arg: "bash yandex-connect-dns.sh update domain.com AAAA"
 # ############
-
+# This is version 2
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin; export PATH
 IFS=$'\n'
 ############ Functions ############
